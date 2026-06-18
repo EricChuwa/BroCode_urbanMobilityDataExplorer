@@ -1,0 +1,37 @@
+/* ── Reset & base ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  background: #0d1117;
+  color: #e8edf3;
+  overflow-x: hidden;
+}
+
+/* ── CSS variables (our design tokens) ── */
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #111820;
+  --bg-card: #151d27;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --text-primary: #e8edf3;
+  --text-muted: #4a5568;
+  --text-hint: #2d3748;
+  --accent: #378add;
+  --accent-light: #85b7eb;
+  --accent-dim: rgba(55, 138, 221, 0.08);
+  --teal: #5dcaa5;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
