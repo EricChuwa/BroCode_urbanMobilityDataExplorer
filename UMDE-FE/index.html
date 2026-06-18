@@ -154,7 +154,66 @@
           <line x1="6" y1="20" x2="6" y2="14" />
         </svg>
       </button>
-      <!-- F: Slide-in panel -->
+      <!-- F: SLIDE-IN INSIGHTS PANEL -->
+      <div class="insights-panel" id="insights-panel">
+        <div class="panel-header">
+          <span class="panel-title">Zone insights</span>
+          <button class="panel-close" id="panel-close" aria-label="Close panel">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-zone" id="panel-zone">
+          <div class="panel-zone-name" id="panel-zone-name">All zones</div>
+          <div class="panel-zone-sub" id="panel-zone-sub">
+            NYC · All boroughs
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">trip volume · by hour</div>
+          <div class="chart-wrap">
+            <canvas id="hourly-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-section-title">avg fare · by borough</div>
+          <div class="chart-wrap">
+            <canvas id="borough-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel-stats">
+          <div class="panel-stat">
+            <div class="panel-stat-label">avg fare</div>
+            <div class="panel-stat-value" id="panel-fare">—</div>
+          </div>
+          <div class="panel-stat">
+            <div class="panel-stat-label">pickups</div>
+            <div class="panel-stat-value" id="panel-pickups">—</div>
+          </div>
+          <div class="panel-stat">
+            <div class="panel-stat-label">avg distance</div>
+            <div class="panel-stat-value" id="panel-distance">—</div>
+          </div>
+          <div class="panel-stat">
+            <div class="panel-stat-label">peak hour</div>
+            <div class="panel-stat-value" id="panel-peak">—</div>
+          </div>
+        </div>
+      </div>
       <!-- G: Filter bar -->
     </div>
     <!-- F: SLIDE-IN PANEL -->
