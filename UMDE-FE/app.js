@@ -51,3 +51,19 @@ function initZoomControls(map) {
 }
 
 initZoomControls(map);
+
+// ── Component E: Chart toggle button ──
+function initChartToggle() {
+  const btn = document.getElementById("chart-toggle");
+  const panel = document.getElementById("insights-panel");
+
+  btn.addEventListener("click", () => {
+    // Toggle the active class on the button
+    btn.classList.toggle("active");
+
+    // Toggle the open class on the panel
+    panel.classList.toggle("open");
+  });
+}
+
+initChartToggle();
