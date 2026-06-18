@@ -364,9 +364,43 @@
         <button class="filter-apply" id="apply-filters">Apply</button>
       </div>
     </div>
-    <!-- F: SLIDE-IN PANEL -->
-    <!-- G: FILTER BAR -->
-    <!-- H: LEGEND -->
+    <!-- H: LEGEND BAR -->
+    <div class="legend-bar">
+      <div class="legend-left">
+        <span class="legend-title">Activity</span>
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-dot high"></div>
+            <span>High</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot medium"></div>
+            <span>Medium</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot low"></div>
+            <span>Low</span>
+          </div>
+        </div>
+      </div>
+
+      <span class="legend-hint">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        Click any zone to explore
+      </span>
+    </div>
 
     <!-- Libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
