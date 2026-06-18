@@ -214,7 +214,155 @@
           </div>
         </div>
       </div>
-      <!-- G: Filter bar -->
+      <!-- G: FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label class="filter-label">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Hour
+          </label>
+          <div class="filter-inputs">
+            <input
+              type="number"
+              class="filter-input"
+              id="hour-start"
+              min="0"
+              max="23"
+              value="0"
+              placeholder="0"
+            />
+            <span class="filter-sep">—</span>
+            <input
+              type="number"
+              class="filter-input"
+              id="hour-end"
+              min="0"
+              max="23"
+              value="23"
+              placeholder="23"
+            />
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Borough
+          </label>
+          <select class="filter-select" id="borough-filter">
+            <option value="">All</option>
+            <option value="Manhattan">Manhattan</option>
+            <option value="Brooklyn">Brooklyn</option>
+            <option value="Queens">Queens</option>
+            <option value="Bronx">Bronx</option>
+            <option value="Staten Island">Staten Island</option>
+          </select>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="12" y1="1" x2="12" y2="23" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+            Fare
+          </label>
+          <div class="filter-inputs">
+            <input
+              type="number"
+              class="filter-input"
+              id="fare-min"
+              min="0"
+              value="0"
+              placeholder="$0"
+            />
+            <span class="filter-sep">—</span>
+            <input
+              type="number"
+              class="filter-input"
+              id="fare-max"
+              min="0"
+              value="100"
+              placeholder="$100"
+            />
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 8 12 12 14 14" />
+            </svg>
+            Distance
+          </label>
+          <div class="filter-inputs">
+            <input
+              type="number"
+              class="filter-input"
+              id="dist-min"
+              min="0"
+              value="0"
+              placeholder="0"
+            />
+            <span class="filter-sep">—</span>
+            <input
+              type="number"
+              class="filter-input"
+              id="dist-max"
+              min="0"
+              value="50"
+              placeholder="50"
+            />
+          </div>
+        </div>
+
+        <button class="filter-apply" id="apply-filters">Apply</button>
+      </div>
     </div>
     <!-- F: SLIDE-IN PANEL -->
     <!-- G: FILTER BAR -->

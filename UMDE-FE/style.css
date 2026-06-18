@@ -384,3 +384,133 @@ body {
   color: var(--text-primary);
 }
 
+/* ── G: Filter bar ── */
+.filter-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(10, 14, 20, 0.92);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 40px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.filter-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.filter-input {
+  width: 36px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.filter-input::-webkit-outer-spin-button,
+.filter-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.filter-input:focus {
+  border-bottom-color: var(--accent-light);
+  color: var(--text-primary);
+}
+
+.filter-select {
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus {
+  border-bottom-color: var(--accent-light);
+}
+
+.filter-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.filter-sep {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.filter-divider {
+  width: 0.5px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.filter-apply {
+  margin-left: 6px;
+  padding: 5px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+  white-space: nowrap;
+}
+
+.filter-apply:hover {
+  opacity: 0.85;
+}
+
+.filter-apply:active {
+  opacity: 0.7;
+}

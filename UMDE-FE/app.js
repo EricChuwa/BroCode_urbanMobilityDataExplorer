@@ -209,3 +209,27 @@ function initBoroughChart() {
 initInsightsPanel();
 initHourlyChart();
 initBoroughChart();
+
+// ── Component G: Filter bar ──
+function initFilters() {
+  document.getElementById("apply-filters").addEventListener("click", () => {
+    // Collect all filter values
+    const filters = {
+      hourStart: parseInt(document.getElementById("hour-start").value),
+      hourEnd: parseInt(document.getElementById("hour-end").value),
+      borough: document.getElementById("borough-filter").value,
+      fareMin: parseFloat(document.getElementById("fare-min").value),
+      fareMax: parseFloat(document.getElementById("fare-max").value),
+      distMin: parseFloat(document.getElementById("dist-min").value),
+      distMax: parseFloat(document.getElementById("dist-max").value),
+    };
+
+    console.log("Filters applied:", filters);
+
+    // Later we will pass these filters to the API
+    // and update the charts and map with real data
+  });
+}
+
+initFilters();
+    
