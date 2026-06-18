@@ -11,10 +11,9 @@ loadStatCards();
 
 // ── Component C: Map ──
 function initMap() {
-
   // Create the map centered on NYC
-  const map = L.map('map', {
-    center: [40.7128, -74.0060],
+  const map = L.map("map", {
+    center: [40.7128, -74.006],
     zoom: 11,
     minZoom: 10,
     maxZoom: 16,
@@ -23,22 +22,32 @@ function initMap() {
     // Lock map to NYC bounds so user cannot scroll away
     maxBounds: [
       [40.4774, -74.2591],
-      [40.9176, -73.7004]
+      [40.9176, -73.7004],
     ],
-    maxBoundsViscosity: 1.0
+    maxBoundsViscosity: 1.0,
   });
 
   // Dark tile layer from CartoDB
-  L.tileLayer(
-    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    {
-      attribution: '© OpenStreetMap © CARTO',
-      subdomains: 'abcd',
-      maxZoom: 16
-    }
-  ).addTo(map);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: "© OpenStreetMap © CARTO",
+    subdomains: "abcd",
+    maxZoom: 16,
+  }).addTo(map);
 
   return map;
 }
 
 const map = initMap();
+
+// ── Component D: Zoom controls ──
+function initZoomControls(map) {
+  document.getElementById("zoom-in").addEventListener("click", () => {
+    map.zoomIn();
+  });
+
+  document.getElementById("zoom-out").addEventListener("click", () => {
+    map.zoomOut();
+  });
+}
+
+initZoomControls(map);
