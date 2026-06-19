@@ -213,7 +213,6 @@ initBoroughChart();
 // ── Component G: Filter bar ──
 function initFilters() {
   document.getElementById("apply-filters").addEventListener("click", () => {
-    // Collect all filter values
     const filters = {
       hourStart: parseInt(document.getElementById("hour-start").value),
       hourEnd: parseInt(document.getElementById("hour-end").value),
@@ -226,10 +225,169 @@ function initFilters() {
 
     console.log("Filters applied:", filters);
 
-    // Later we will pass these filters to the API
-    // and update the charts and map with real data
+    // Show heat blobs once filters are applied
+    showHeatBlobs(map);
+
+    // Later this will pass filters to the API
+    // and load real pickup counts per zone
   });
 }
 
 initFilters();
-    
+
+// ── GeoJSON: Load taxi zones onto map ──
+function initZones(map) {
+  fetch("assets/taxi_zones.geojson")
+    .then((response) => response.json())
+    .then((data) => {
+      L.geoJSON(data, {
+        style: function (feature) {
+          return {
+            fillColor: getZoneColour(feature.properties.borough),
+            fillOpacity: 0.15,
+            color: getZoneBorderColour(feature.properties.borough),
+            weight: 0.5,
+            opacity: 0.4,
+          };
+        },
+
+        onEachFeature: function (feature, layer) {
+          // Show zone name on hover
+          layer.on("mouseover", function () {
+            layer.setStyle({
+              fillOpacity: 0.35,
+              weight: 1,
+              opacity: 0.8,
+            });
+          });
+
+          // Reset on mouse out
+          layer.on("mouseout", function () {
+            layer.setStyle({
+              fillOpacity: 0.15,
+              weight: 0.5,
+              opacity: 0.4,
+            });
+          });
+
+          // Show zone info in panel on click
+          layer.on("click", function () {
+            const props = feature.properties;
+
+            // Update panel zone info
+            document.getElementById("panel-zone-name").textContent = props.zone;
+            document.getElementById("panel-zone-sub").textContent =
+              props.borough + " · Zone " + props.LocationID;
+
+            // Open the panel
+            document.getElementById("insights-panel").classList.add("open");
+            document.getElementById("chart-toggle").classList.add("active");
+          });
+        },
+      }).addTo(map);
+    })
+    .catch((err) => console.error("GeoJSON load error:", err));
+}
+
+// ── Colour each borough differently ──
+function getZoneColour(borough) {
+  const colours = {
+    Manhattan: "#378ADD",
+    Brooklyn: "#5DCAA5",
+    Queens: "#EF9F27",
+    Bronx: "#7F77DD",
+    "Staten Island": "#D85A30",
+    EWR: "#888780",
+  };
+  return colours[borough] || "#378ADD";
+}
+
+function getZoneBorderColour(borough) {
+  const colours = {
+    Manhattan: "#85B7EB",
+    Brooklyn: "#9FE1CB",
+    Queens: "#FAC775",
+    Bronx: "#AFA9EC",
+    "Staten Island": "#F0997B",
+    EWR: "#B4B2A9",
+  };
+  return colours[borough] || "#85B7EB";
+}
+
+initZones(map);
+
+// ── Heat blobs: show activity intensity per zone ──
+let heatBlobLayer = null;
+
+function showHeatBlobs(map) {
+  // Remove old blobs if they exist
+  if (heatBlobLayer) {
+    map.removeLayer(heatBlobLayer);
+  }
+
+  // Dummy pickup data per zone (will come from API later)
+  // Format: [latitude, longitude, pickup count]
+  const dummyZoneActivity = [
+    [40.7549, -73.984, 4821], // Midtown
+    [40.758, -73.9855, 3950], // Times Square area
+    [40.7128, -74.006, 2100], // Lower Manhattan
+    [40.6892, -73.9442, 1450], // Brooklyn
+    [40.7282, -73.7949, 1800], // Queens / JFK area
+    [40.8448, -73.8648, 600], // Bronx
+    [40.5795, -74.1502, 300], // Staten Island
+  ];
+
+  // Find the highest pickup count to scale everything else against
+  const maxCount = Math.max(...dummyZoneActivity.map((z) => z[2]));
+
+  const blobs = dummyZoneActivity.map((zone) => {
+    const [lat, lng, count] = zone;
+
+    // Scale radius between 800m and 2200m based on activity
+    const radius = 800 + (count / maxCount) * 1400;
+
+    // Pick colour based on activity level
+    let colour;
+    if (count / maxCount > 0.6) {
+      colour = "#EF9F27"; // gold = high
+    } else if (count / maxCount > 0.3) {
+      colour = "#5DCAA5"; // teal = medium
+    } else {
+      colour = "#378ADD"; // blue = low
+    }
+
+    // The soft glowing blob
+    const blob = L.circle([lat, lng], {
+      radius: radius,
+      fillColor: colour,
+      fillOpacity: 0.25,
+      color: colour,
+      weight: 0,
+      opacity: 0.5,
+    });
+
+    // The precise center point marker
+    const point = L.circleMarker([lat, lng], {
+      radius: 3,
+      fillColor: "#FFFFFF",
+      fillOpacity: 0.9,
+      color: colour,
+      weight: 1.5,
+      opacity: 1,
+    });
+
+    return [blob, point];
+  });
+
+  // Flatten since each zone now returns two layers (blob + point)
+  const flatBlobs = blobs.flat();
+
+  heatBlobLayer = L.layerGroup(flatBlobs).addTo(map);
+}
+
+function hideHeatBlobs(map) {
+  if (heatBlobLayer) {
+    map.removeLayer(heatBlobLayer);
+    heatBlobLayer = null;
+  }
+}
