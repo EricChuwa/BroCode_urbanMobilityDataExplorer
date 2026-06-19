@@ -1,0 +1,41 @@
+# Environment
+.env
+
+# Node
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+*.db
+*.sqlite
+
+# Data files - too large for GitHub
+data/raw/yellow_tripdata_2026-01.parquet
+data/raw/taxi_zone_lookup.csv
+data/processed/
+
+# Docker
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+.env
+node_modules/
+package-lock.json
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite
+data/raw/
+data/processed/
+postgres_data/
+.DS_Store
+Thumbs.db
