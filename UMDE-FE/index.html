@@ -27,77 +27,83 @@
   </head>
 
   <body>
-    <!-- A: NAVBAR -->
-    <nav class="navbar">
-      <div class="navbar-left">
-        <div class="nav-icon">
-          <i
-            data-lucide="car-taxi-front"
-            style="width: 18px; height: 18px; stroke: white; stroke-width: 1.5"
-          ></i>
+    <!-- TOP SECTION -->
+    <div class="top-section">
+      <!-- A: NAVBAR -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <div class="nav-icon">
+            <i
+              data-lucide="car-taxi-front"
+              style="
+                width: 18px;
+                height: 18px;
+                stroke: white;
+                stroke-width: 1.5;
+              "
+            ></i>
+          </div>
+          <span class="nav-title">City Lens</span>
         </div>
-        <span class="nav-title">City Lens</span>
-      </div>
 
-      <div class="navbar-right">
-        <span class="nav-badge" id="trip-count">
-          <svg
-            width="11"
-            height="11"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-          <span id="trip-count-value">1.2M trips</span>
-        </span>
-        <button class="nav-toggle" id="theme-toggle">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          >
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1" x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1" y1="12" x2="3" y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-          </svg>
-        </button>
-      </div>
-    </nav>
-    <!-- B: STAT CARDS -->
-    <section class="stat-cards">
-      <div class="stat-card">
-        <span class="stat-label">avg fare</span>
-        <span class="stat-value" id="stat-fare">—</span>
-      </div>
+        <div class="navbar-right">
+          <span class="nav-badge" id="trip-count">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="trip-count-value">1.2M trips</span>
+          </span>
+          <button class="nav-toggle" id="theme-toggle">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </nav>
 
-      <div class="stat-card">
-        <span class="stat-label">avg distance</span>
-        <span class="stat-value" id="stat-distance">—</span>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-label">peak hour</span>
-        <span class="stat-value" id="stat-peak">—</span>
-      </div>
-
-      <div class="stat-card">
-        <span class="stat-label">top zone</span>
-        <span class="stat-value" id="stat-zone">—</span>
-      </div>
-    </section>
+      <!-- B: STAT CARDS -->
+      <section class="stat-cards">
+        <div class="stat-card">
+          <span class="stat-label">avg fare</span>
+          <span class="stat-value" id="stat-fare">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">avg distance</span>
+          <span class="stat-value" id="stat-distance">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">peak hour</span>
+          <span class="stat-value" id="stat-peak">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">top zone</span>
+          <span class="stat-value" id="stat-zone">—</span>
+        </div>
+      </section>
+    </div>
     <!-- C: MAP + OVERLAYS -->
     <div class="map-wrapper">
       <div id="map"></div>
