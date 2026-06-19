@@ -57,25 +57,31 @@ function initChartToggle() {
   const btn = document.getElementById("chart-toggle");
   const panel = document.getElementById("insights-panel");
 
-  btn.addEventListener("click", () => {
-    // Toggle the active class on the button
-    btn.classList.toggle("active");
+  function openPanel() {
+    panel.classList.add("open");
+    btn.classList.add("active");
+  }
 
-    // Toggle the open class on the panel
-    panel.classList.toggle("open");
+  function closePanel() {
+    panel.classList.remove("open");
+    btn.classList.remove("active");
+  }
+
+  btn.addEventListener("click", () => {
+    if (panel.classList.contains("open")) {
+      closePanel();
+    } else {
+      openPanel();
+    }
   });
+
+  document.getElementById("panel-close").addEventListener("click", closePanel);
 }
 
 initChartToggle();
 
 // ── Component F: Slide-in panel ──
 function initInsightsPanel() {
-  // Close button inside the panel
-  document.getElementById("panel-close").addEventListener("click", () => {
-    document.getElementById("insights-panel").classList.remove("open");
-    document.getElementById("chart-toggle").classList.remove("active");
-  });
-
   // Load dummy data into panel stats
   document.getElementById("panel-fare").textContent = "$22.10";
   document.getElementById("panel-pickups").textContent = "4,821";
@@ -391,3 +397,38 @@ function hideHeatBlobs(map) {
     heatBlobLayer = null;
   }
 }
+
+// ── Theme toggle: light / dark mode ──
+function initThemeToggle() {
+  const toggleBtn = document.getElementById("theme-toggle");
+
+  toggleBtn.addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
+
+    // Swap the map tile layer to match the theme
+    const isLight = document.body.classList.contains("light-mode");
+    updateMapTheme(isLight);
+  });
+}
+
+function updateMapTheme(isLight) {
+  // Remove the existing tile layer
+  map.eachLayer((layer) => {
+    if (layer instanceof L.TileLayer) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Add the correct tile layer for the theme
+  const tileUrl = isLight
+    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+  L.tileLayer(tileUrl, {
+    attribution: "© OpenStreetMap © CARTO",
+    subdomains: "abcd",
+    maxZoom: 16,
+  }).addTo(map);
+}
+
+initThemeToggle();

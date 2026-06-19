@@ -602,3 +602,86 @@ body {
   font-style: italic;
   letter-spacing: 0.02em;
 }
+
+/* ── Light mode overrides ── */
+body.light-mode {
+  --bg-primary: #bbbaba;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.16);
+  --text-primary: #0e0f0f;
+  --text-muted: #8a93a3;
+  --text-hint: #c2c9d6;
+}
+
+body.light-mode .stat-card,
+body.light-mode .nav-title {
+  color: #070707 !important;
+}
+
+body.light-mode .nav-badge {
+  color: #070707 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.light-mode .nav-toggle {
+  color: #070707 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.light-mode .nav-toggle:hover {
+  color: var(--accent-light) !important;
+}
+body.light-mode .filter-group,
+body.light-mode .panel-zone,
+body.light-mode .panel-section,
+body.light-mode .panel-stat {
+  background: rgba(0, 0, 0, 0.035);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .stat-card:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .stat-label {
+  color: #3f3e3e !important;
+}
+body.light-mode .stat-value {
+  color: #070707 !important;
+}
+
+body.light-mode .filter-label {
+  color: #3f3e3e !important;
+}
+body.light-mode .filter-value {
+  color: #070707 !important;
+}
+body.light-mode .panel-section-title,
+body.light-mode .panel-stat-label {
+  color: #3f3e3e !important;
+}
+
+body.light-mode .panel-stat-value {
+  color: #070707 !important;
+}
+
+body.light-mode .legend-title,
+body.light-mode .legend-hint {
+  color: #212122;
+}
+
+body.light-mode #map {
+  background: #e8ebef;
+}
+
+.taxi-icon {
+  stroke: white;
+}
+
+body.light-mode .taxi-icon {
+  stroke: #1a1f29;
+}
