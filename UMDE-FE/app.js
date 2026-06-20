@@ -326,53 +326,46 @@ initZones(map);
 let heatBlobLayer = null;
 
 function showHeatBlobs(map) {
-  // Remove old blobs if they exist
   if (heatBlobLayer) {
     map.removeLayer(heatBlobLayer);
   }
 
-  // Dummy pickup data per zone (will come from API later)
-  // Format: [latitude, longitude, pickup count]
+  const isLight = document.body.classList.contains("light-mode");
+
   const dummyZoneActivity = [
-    [40.7549, -73.984, 4821], // Midtown
-    [40.758, -73.9855, 3950], // Times Square area
-    [40.7128, -74.006, 2100], // Lower Manhattan
-    [40.6892, -73.9442, 1450], // Brooklyn
-    [40.7282, -73.7949, 1800], // Queens / JFK area
-    [40.8448, -73.8648, 600], // Bronx
-    [40.5795, -74.1502, 300], // Staten Island
+    [40.7549, -73.984, 4821],
+    [40.758, -73.9855, 3950],
+    [40.7128, -74.006, 2100],
+    [40.6892, -73.9442, 1450],
+    [40.7282, -73.7949, 1800],
+    [40.8448, -73.8648, 600],
+    [40.5795, -74.1502, 300],
   ];
 
-  // Find the highest pickup count to scale everything else against
   const maxCount = Math.max(...dummyZoneActivity.map((z) => z[2]));
 
   const blobs = dummyZoneActivity.map((zone) => {
     const [lat, lng, count] = zone;
-
-    // Scale radius between 800m and 2200m based on activity
     const radius = 800 + (count / maxCount) * 1400;
 
-    // Pick colour based on activity level
     let colour;
     if (count / maxCount > 0.6) {
-      colour = "#EF9F27"; // gold = high
+      colour = isLight ? "#C9760F" : "#EF9F27";
     } else if (count / maxCount > 0.3) {
-      colour = "#5DCAA5"; // teal = medium
+      colour = isLight ? "#1F8F68" : "#5DCAA5";
     } else {
-      colour = "#378ADD"; // blue = low
+      colour = isLight ? "#1A5FA3" : "#378ADD";
     }
 
-    // The soft glowing blob
     const blob = L.circle([lat, lng], {
       radius: radius,
       fillColor: colour,
-      fillOpacity: 0.25,
+      fillOpacity: isLight ? 0.45 : 0.25,
       color: colour,
       weight: 0,
-      opacity: 0.5,
+      opacity: 0.6,
     });
 
-    // The precise center point marker
     const point = L.circleMarker([lat, lng], {
       radius: 3,
       fillColor: "#FFFFFF",
@@ -385,9 +378,7 @@ function showHeatBlobs(map) {
     return [blob, point];
   });
 
-  // Flatten since each zone now returns two layers (blob + point)
   const flatBlobs = blobs.flat();
-
   heatBlobLayer = L.layerGroup(flatBlobs).addTo(map);
 }
 
@@ -405,9 +396,17 @@ function initThemeToggle() {
   toggleBtn.addEventListener("click", () => {
     document.body.classList.toggle("light-mode");
 
-    // Swap the map tile layer to match the theme
     const isLight = document.body.classList.contains("light-mode");
     updateMapTheme(isLight);
+
+    // Refresh heat blobs with theme-correct colours if visible
+    if (heatBlobLayer) {
+      showHeatBlobs(map);
+    }
+
+    toggleBtn.innerHTML = isLight
+      ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+      : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>';
   });
 }
 

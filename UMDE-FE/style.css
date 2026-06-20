@@ -14,7 +14,7 @@ body {
   font-size: 14px;
   background: #0d1117;
   color: #e8edf3;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ── CSS variables (our design tokens) ── */
@@ -605,83 +605,219 @@ body {
 
 /* ── Light mode overrides ── */
 body.light-mode {
-  --bg-primary: #bbbaba;
+  --bg-primary: #f8f9fb;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.16);
-  --text-primary: #0e0f0f;
-  --text-muted: #8a93a3;
-  --text-hint: #c2c9d6;
+  --border: rgba(15, 23, 42, 0.08);
+  --border-hover: rgba(15, 23, 42, 0.16);
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --text-hint: #cbd5e1;
 }
 
 body.light-mode .stat-card,
-body.light-mode .nav-title {
-  color: #070707 !important;
-}
-
-body.light-mode .nav-badge {
-  color: #070707 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-body.light-mode .nav-toggle {
-  color: #070707 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-body.light-mode .nav-toggle:hover {
-  color: var(--accent-light) !important;
-}
 body.light-mode .filter-group,
 body.light-mode .panel-zone,
 body.light-mode .panel-section,
 body.light-mode .panel-stat {
-  background: rgba(0, 0, 0, 0.035);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.06),
+    0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 body.light-mode .stat-card:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  border-color: rgba(55, 138, 221, 0.3);
 }
 
-body.light-mode .stat-label {
-  color: #3f3e3e !important;
-}
-body.light-mode .stat-value {
-  color: #070707 !important;
-}
-
-body.light-mode .filter-label {
-  color: #3f3e3e !important;
-}
-body.light-mode .filter-value {
-  color: #070707 !important;
-}
+body.light-mode .stat-label,
+body.light-mode .filter-label,
 body.light-mode .panel-section-title,
-body.light-mode .panel-stat-label {
-  color: #3f3e3e !important;
-}
-
-body.light-mode .panel-stat-value {
-  color: #070707 !important;
-}
-
+body.light-mode .panel-stat-label,
 body.light-mode .legend-title,
 body.light-mode .legend-hint {
-  color: #212122;
+  color: #64748b;
+}
+
+body.light-mode .panel-zone-name,
+body.light-mode .panel-stat-value {
+  color: #0f172a;
 }
 
 body.light-mode #map {
-  background: #e8ebef;
+  background: #eef1f6;
 }
 
-.taxi-icon {
-  stroke: white;
+body.light-mode .legend-bar {
+  background: #f8f9fb;
 }
 
-body.light-mode .taxi-icon {
-  stroke: #1a1f29;
+body.light-mode .zoom-controls,
+body.light-mode .chart-toggle-btn {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+body.light-mode .zoom-btn,
+body.light-mode .chart-toggle-btn {
+  color: #64748b;
+}
+
+body.light-mode .zoom-btn:hover {
+  background: rgba(55, 138, 221, 0.08);
+  color: #378add;
+}
+
+body.light-mode .chart-toggle-btn:hover {
+  background: rgba(55, 138, 221, 0.08);
+  color: #378add;
+}
+
+body.light-mode .filter-apply {
+  box-shadow: 0 2px 8px rgba(55, 138, 221, 0.25);
+}
+
+/*Mobile Responsiveness*/
+
+@media (max-width: 768px) {
+  .top-section {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-title {
+    font-size: 13px;
+  }
+
+  .nav-badge {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  .nav-badge svg {
+    display: none;
+  }
+
+  /* Stack stat cards into 2x2 grid*/
+  .stat-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .stat-value {
+    font-size: 15px;
+  }
+
+  .map-wrapper {
+    flex: 1;
+    height: auto;
+  }
+
+  .filter-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    transform: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    backdrop-filter: none;
+  }
+
+  .filter-group {
+    padding: 6px 10px;
+    background: rgba(13, 17, 23, 0.85);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  body.light-mode .filter-group {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(15, 23, 42, 0.1);
+  }
+
+  .filter-label {
+    font-size: 8.5px;
+  }
+
+  .filter-input {
+    width: 22px;
+    font-size: 10px;
+    height: 16px;
+  }
+
+  .filter-select {
+    font-size: 10px;
+    height: 16px;
+  }
+
+  .filter-apply {
+    padding: 7px 16px;
+    font-size: 10px;
+  }
+
+  .insights-panel {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .zoom-controls,
+  .chart-toggle-btn {
+    top: 12px;
+  }
+
+  .zoom-controls {
+    left: 12px;
+  }
+
+  .chart-toggle-btn {
+    right: 12px;
+  }
+
+  .legend-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 10px 14px;
+    gap: 6px;
+  }
+
+  .legend-left {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .legend-title {
+    font-size: 9px;
+  }
+
+  .legend-item {
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .legend-hint {
+    font-size: 9px;
+  }
 }
