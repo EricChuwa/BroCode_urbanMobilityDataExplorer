@@ -75,3 +75,50 @@ def clean_chunk(chunk):
     chunk['total_amount'] = chunk['total_amount'].astype('float32')
 
     return chunk
+
+def run():
+    print('Loading parquet in batches...')
+    parquet_file = pq.ParquetFile(PARQUET_PATH)
+
+    batches = [
+        batch.to_pandas()
+        for batch in parquet_file.iter_batches(
+            batch_size=500_000,
+            columns=COLUMNS
+        )
+    ]
+    print(f'{len(batches)} batches loaded. Cleaning in parallel...')
+
+    n_workers = multiprocessing.cpu_count()
+    with multiprocessing.Pool(processes=n_workers) as pool:
+        cleaned_batches = pool.map(clean_chunk, batches)
+
+    print('Merging batches...')
+    cleaned = pd.concat(cleaned_batches, ignore_index=True)
+
+    print('Joining with zone lookup...')
+    lookup = pd.read_csv(LOOKUP_PATH)
+    cleaned = cleaned.merge(
+        lookup,
+        left_on='PULocationID',
+        right_on='LocationID',
+        how='left'
+    )
+
+    print(f'Clean records: {len(cleaned):,}')
+    cleaned.to_csv(OUTPUT_PATH, index=False)
+    print(f'Saved to {OUTPUT_PATH}')
+
+    with open(LOG_PATH, 'w', newline='') as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=['timestamp', 'reason', 'records_removed']
+        )
+        writer.writeheader()
+        writer.writerows(exclusion_log)
+
+    print(f'Exclusion log saved to {LOG_PATH}')
+    print('Done.')
+
+if __name__ == '__main__':
+    run()
