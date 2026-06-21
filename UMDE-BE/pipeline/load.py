@@ -2,7 +2,6 @@ import pandas as pd
 import pyarrow.parquet as pq
 import os
 
-# ── Absolute paths ──────────────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PARQUET_PATH = os.path.join(BASE_DIR, 'data', 'raw', 'yellow_tripdata_2026-01.parquet')
 LOOKUP_PATH  = os.path.join(BASE_DIR, 'data', 'raw', 'taxi_zone_lookup.csv')
