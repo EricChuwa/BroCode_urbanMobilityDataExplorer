@@ -1,5 +1,5 @@
 # Urban Mobility Data Explorer (UMDE)
-### Team BroCode — ALU Software Engineering
+### Team BroCode
 
 An interactive full-stack web application that processes, stores, and visualises NYC Yellow Taxi trip data to reveal meaningful patterns in urban mobility across New York City.
 
