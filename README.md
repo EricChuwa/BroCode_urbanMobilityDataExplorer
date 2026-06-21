@@ -244,7 +244,7 @@ A **merge sort** algorithm is manually implemented in `UMDE-BE/src/utils/algorit
 
 ## Team
 
-See [AUTHORS.md](./AUTHORS.md) for team member details
+See [AUTHORS.md](./AUTHORS.md) for team member details.
 Contributions: [Team Task Sheet](https://docs.google.com/spreadsheets/d/1fYJuUfY21v7Rtif5LXTeYruGEIQVftETvTQ7biIU5KA/edit?usp=sharing)
 
 ---
