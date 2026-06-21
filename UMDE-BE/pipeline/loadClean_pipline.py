@@ -59,3 +59,137 @@ def get_system_profile():
     print('======================\n')
 
     return batch_size, n_workers
+
+#  Clean a single chunk 
+def clean_chunk(chunk):
+    local_log = []
+
+    def log(reason, count):
+        if count > 0:
+            local_log.append({
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'reason': reason,
+                'records_removed': count
+            })
+
+    # Duplicates
+    before = len(chunk)
+    chunk = chunk.drop_duplicates()
+    log('duplicates_removed', before - len(chunk))
+
+    # Missing values
+    before = len(chunk)
+    chunk = chunk.dropna(subset=COLUMNS)
+    log('missing_values', before - len(chunk))
+
+    # Logical outliers
+    before = len(chunk)
+    chunk = chunk[chunk['fare_amount'] > 0]
+    chunk = chunk[chunk['trip_distance'] > 0]
+    chunk = chunk[chunk['total_amount'] > 0]
+    chunk = chunk[
+        chunk['tpep_dropoff_datetime'] >
+        chunk['tpep_pickup_datetime']
+    ]
+    log('logical_outliers', before - len(chunk))
+
+    # Extreme outliers
+    before = len(chunk)
+    chunk = chunk[chunk['trip_distance'] < 100]
+    chunk = chunk[chunk['fare_amount'] < 500]
+    log('extreme_outliers', before - len(chunk))
+
+    # Fix types
+    chunk['PULocationID']  = chunk['PULocationID'].astype('int16')
+    chunk['DOLocationID']  = chunk['DOLocationID'].astype('int16')
+    chunk['payment_type']  = chunk['payment_type'].astype('int8')
+    chunk['fare_amount']   = chunk['fare_amount'].astype('float32')
+    chunk['trip_distance'] = chunk['trip_distance'].astype('float32')
+    chunk['total_amount']  = chunk['total_amount'].astype('float32')
+
+    return chunk, local_log
+
+#  Main 
+def run():
+    # Step 1 — detect hardware
+    batch_size, n_workers = get_system_profile()
+
+    # Step 2 — find all parquet files
+    parquet_files = sorted([
+        os.path.join(TRIP_DATA_DIR, f)
+        for f in os.listdir(TRIP_DATA_DIR)
+        if f.endswith('.parquet')
+    ])
+
+    print(f'Found {len(parquet_files)} parquet files:')
+    total_raw = 0
+    for f in parquet_files:
+        pf   = pq.ParquetFile(f)
+        rows = pf.metadata.num_rows
+        total_raw += rows
+        print(f'  {os.path.basename(f)}: {rows:,} rows')
+    print(f'\nTotal raw rows: {total_raw:,}\n')
+
+    # Step 3 — load all files in batches
+    print('Loading batches...')
+    all_batches = []
+    for path in parquet_files:
+        print(f'  Loading {os.path.basename(path)}...')
+        pf = pq.ParquetFile(path)
+        for batch in pf.iter_batches(
+            batch_size=batch_size,
+            columns=COLUMNS
+        ):
+            all_batches.append(batch.to_pandas())
+
+    print(f'\n{len(all_batches)} batches loaded across all files')
+
+    # Step 4 — clean in parallel
+    print(f'Cleaning in parallel with {n_workers} workers...')
+    os.makedirs(os.path.join(BASE_DIR, 'data', 'processed'), exist_ok=True)
+
+    with multiprocessing.Pool(processes=n_workers) as pool:
+        results = pool.map(clean_chunk, all_batches)
+
+    cleaned_batches = [r[0] for r in results]
+    all_logs        = [entry for r in results for entry in r[1]]
+
+    # Step 5 — merge
+    print('Merging cleaned batches...')
+    cleaned = pd.concat(cleaned_batches, ignore_index=True)
+
+    # Step 6 — join with zone lookup
+    print('Joining with zone lookup...')
+    lookup = pd.read_csv(LOOKUP_PATH)
+    cleaned = cleaned.merge(
+        lookup,
+        left_on='PULocationID',
+        right_on='LocationID',
+        how='left'
+    )
+
+    # Step 7 — summary
+    removed = total_raw - len(cleaned)
+    print(f'\n=== PIPELINE SUMMARY ===')
+    print(f'Raw rows:       {total_raw:,}')
+    print(f'Clean rows:     {len(cleaned):,}')
+    print(f'Removed:        {removed:,} ({removed/total_raw*100:.1f}%)')
+    print(f'========================\n')
+
+    # Step 8 — save
+    cleaned.to_csv(OUTPUT_PATH, index=False)
+    print(f'Saved to {OUTPUT_PATH}')
+
+    with open(LOG_PATH, 'w', newline='') as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=['timestamp', 'reason', 'records_removed']
+        )
+        writer.writeheader()
+        writer.writerows(all_logs)
+
+    print(f'Exclusion log saved to {LOG_PATH}')
+    print('Done.')
+
+if __name__ == '__main__':
+    run()
