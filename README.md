@@ -5,15 +5,15 @@ An interactive full-stack web application that processes, stores, and visualises
 
 ---
 
-## 📽️ Video Walkthrough
+## Video Walkthrough
 > [Insert video link here]
 
-## 📄 Database Dump (Full)
+## Database Dump (Full)
 > [Google Drive — Full DB Dump](https://drive.google.com/file/d/17zWiBQG-VbxkjbpIcDStc0LaWVqR3KhB/view?usp=sharing)
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 BroCode_urbanMobilityDataExplorer/
@@ -56,7 +56,7 @@ BroCode_urbanMobilityDataExplorer/
 
 ---
 
-## ⚙️ Prerequisites
+## Prerequisites
 
 Make sure you have the following installed:
 
@@ -69,7 +69,7 @@ Make sure you have the following installed:
 
 ---
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 ### 1. Clone the Repository
 
@@ -193,7 +193,7 @@ curl http://127.0.0.1:3000/
 
 ---
 
-## 🌐 Running the Frontend
+## Running the Frontend
 
 ```bash
 cd UMDE-FE
@@ -232,7 +232,7 @@ http://127.0.0.1:8080
 
 ---
 
-## 🧠 Custom Algorithm
+## Custom Algorithm
 
 A **merge sort** algorithm is manually implemented in `UMDE-BE/src/utils/algorithm.js` to rank taxi zones by trip volume without using JavaScript's built-in `.sort()`.
 
@@ -242,7 +242,7 @@ A **merge sort** algorithm is manually implemented in `UMDE-BE/src/utils/algorit
 
 ---
 
-## 👥 Team
+## Team
 
 See [AUTHORS.md](./AUTHORS.md) for team member details and contributions.
 
