@@ -38,4 +38,4 @@ data/raw/
 data/processed/
 postgres_data/
 .DS_Store
-Thumbs.db
+docs/umde_dump.pgdump

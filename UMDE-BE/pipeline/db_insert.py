@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 # Load env 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-load_dotenv(os.path.join(BASE_DIR, 'UMDE-BE', '.env'))
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Paths 
 LOOKUP_PATH   = os.path.join(BASE_DIR, 'data', 'raw', 'taxi_zone_lookup.csv')
