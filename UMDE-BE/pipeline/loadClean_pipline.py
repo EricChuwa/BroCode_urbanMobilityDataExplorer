@@ -111,10 +111,10 @@ def clean_chunk(chunk):
 
 #  Main 
 def run():
-    # Step 1 — detect hardware
+    # Detect hardware
     batch_size, n_workers = get_system_profile()
 
-    # Step 2 — find all parquet files
+    # find all parquet files
     parquet_files = sorted([
         os.path.join(TRIP_DATA_DIR, f)
         for f in os.listdir(TRIP_DATA_DIR)
@@ -130,7 +130,7 @@ def run():
         print(f'  {os.path.basename(f)}: {rows:,} rows')
     print(f'\nTotal raw rows: {total_raw:,}\n')
 
-    # Step 3 — load all files in batches
+    # Load all files in batches
     print('Loading batches...')
     all_batches = []
     for path in parquet_files:
@@ -144,7 +144,7 @@ def run():
 
     print(f'\n{len(all_batches)} batches loaded across all files')
 
-    # Step 4 — clean in parallel
+    # Clean in parallel
     print(f'Cleaning in parallel with {n_workers} workers...')
     os.makedirs(os.path.join(BASE_DIR, 'data', 'processed'), exist_ok=True)
 
@@ -154,11 +154,11 @@ def run():
     cleaned_batches = [r[0] for r in results]
     all_logs        = [entry for r in results for entry in r[1]]
 
-    # Step 5 — merge
+    # Merge
     print('Merging cleaned batches...')
     cleaned = pd.concat(cleaned_batches, ignore_index=True)
 
-    # Step 6 — join with zone lookup
+    # join with zone lookup
     print('Joining with zone lookup...')
     lookup = pd.read_csv(LOOKUP_PATH)
     cleaned = cleaned.merge(
@@ -168,7 +168,7 @@ def run():
         how='left'
     )
 
-    # Step 7 — summary
+    # Summary
     removed = total_raw - len(cleaned)
     print(f'\n=== PIPELINE SUMMARY ===')
     print(f'Raw rows:       {total_raw:,}')
@@ -176,7 +176,7 @@ def run():
     print(f'Removed:        {removed:,} ({removed/total_raw*100:.1f}%)')
     print(f'========================\n')
 
-    # Step 8 — save
+    # Save cleaned data and logs
     cleaned.to_csv(OUTPUT_PATH, index=False)
     print(f'Saved to {OUTPUT_PATH}')
 
