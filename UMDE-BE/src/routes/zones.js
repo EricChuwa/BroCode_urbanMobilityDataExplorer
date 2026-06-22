@@ -38,4 +38,36 @@ router.get('/top-pickup', async (req, res) => {
   }
 });
 
+// GET /api/zones/:locationId/summary
+router.get('/:locationId/summary', async (req, res) => {
+  try {
+    const { locationId } = req.params;
+
+    const result = await pool.query(`
+      SELECT
+        z.zone,
+        z.borough,
+        COUNT(*) AS trip_count,
+        ROUND(AVG(t.fare_amount)::numeric, 2) AS avg_fare,
+        ROUND(AVG(t.trip_distance)::numeric, 2) AS avg_distance,
+        ROUND(AVG(t.trip_speed)::numeric, 2) AS avg_speed,
+        EXTRACT(HOUR FROM t.pickup_datetime) AS peak_hour
+      FROM trips t
+      LEFT JOIN zones z ON t.pu_location_id = z.location_id
+      WHERE t.pu_location_id = $1
+      GROUP BY z.zone, z.borough, peak_hour
+      ORDER BY COUNT(*) DESC
+      LIMIT 1
+    `, [parseInt(locationId)]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Zone not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

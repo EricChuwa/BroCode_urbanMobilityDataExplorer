@@ -1,11 +1,43 @@
 console.log("City Lens loaded");
 
-// ── Dummy data (will be replaced by API calls later) ──
-function loadStatCards() {
-  document.getElementById("stat-fare").textContent = "$18.40";
-  document.getElementById("stat-distance").textContent = "3.2 mi";
-  document.getElementById("stat-peak").textContent = "6 pm";
-  document.getElementById("stat-zone").textContent = "Midtown";
+const API_BASE = "http://127.0.0.1:3000/api";
+
+// ── Fetch helper ──
+async function fetchJSON(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error("API error:", err);
+    return null;
+  }
+}
+
+// ── Dummy data (replaced by API calls) ──
+async function loadStatCards() {
+  const [boroughData, hourData] = await Promise.all([
+    fetchJSON(`${API_BASE}/summary/by-borough`),
+    fetchJSON(`${API_BASE}/summary/by-hour`)
+  ]);
+
+  if (!boroughData || !hourData) return;
+
+  const manhattan = boroughData.find((b) => b.borough === "Manhattan");
+  const all = boroughData.filter(
+    (b) => b.borough && b.borough !== "NaN" && b.borough !== "Unknown" && b.borough !== "EWR"
+  );
+  const peakHour = hourData.reduce((max, h) =>
+    parseInt(h.trip_count) > parseInt(max.trip_count) ? h : max
+  );
+
+  document.getElementById("stat-fare").textContent =
+    manhattan ? `$${manhattan.avg_fare}` : "N/A";
+  document.getElementById("stat-distance").textContent =
+    manhattan ? `${manhattan.avg_distance} mi` : "N/A";
+  document.getElementById("stat-peak").textContent = `${peakHour.hour}:00`;
+  document.getElementById("stat-zone").textContent =
+    all[0] ? all[0].borough : "N/A";
 }
 loadStatCards();
 
@@ -81,34 +113,28 @@ function initChartToggle() {
 initChartToggle();
 
 // ── Component F: Slide-in panel ──
-function initInsightsPanel() {
-  // Load dummy data into panel stats
-  document.getElementById("panel-fare").textContent = "$22.10";
-  document.getElementById("panel-pickups").textContent = "4,821";
-  document.getElementById("panel-distance").textContent = "3.4 mi";
-  document.getElementById("panel-peak").textContent = "6 pm";
+async function initInsightsPanel() {
+  const data = await fetchJSON(`${API_BASE}/summary/by-borough`);
+  if (!data) return;
+
+  const manhattan = data.find((b) => b.borough === "Manhattan");
+  if (!manhattan) return;
+
+  document.getElementById("panel-fare").textContent = `$${manhattan.avg_fare}`;
+  document.getElementById("panel-pickups").textContent =
+    parseInt(manhattan.trip_count).toLocaleString();
+  document.getElementById("panel-distance").textContent =
+    `${manhattan.avg_distance} mi`;
+  document.getElementById("panel-peak").textContent = "18:00";
 }
 
 // ── Chart 1: Trip volume by hour ──
-function initHourlyChart() {
+async function initHourlyChart() {
   const ctx = document.getElementById("hourly-chart").getContext("2d");
+  const data = await fetchJSON(`${API_BASE}/summary/by-hour`);
 
-  const hours = [
-    "12a",
-    "2a",
-    "4a",
-    "6a",
-    "8a",
-    "10a",
-    "12p",
-    "2p",
-    "4p",
-    "6p",
-    "8p",
-    "10p",
-  ];
-
-  const data = [320, 180, 90, 210, 580, 720, 650, 700, 740, 890, 760, 540];
+  const hours = data ? data.map((d) => `${d.hour}:00`) : [];
+  const tripCounts = data ? data.map((d) => parseInt(d.trip_count)) : [];
 
   new Chart(ctx, {
     type: "line",
@@ -116,7 +142,7 @@ function initHourlyChart() {
       labels: hours,
       datasets: [
         {
-          data: data,
+          data: tripCounts,
           borderColor: "#378ADD",
           backgroundColor: "rgba(55,138,221,0.1)",
           borderWidth: 1.5,
@@ -160,16 +186,30 @@ function initHourlyChart() {
 }
 
 // ── Chart 2: Avg fare by borough ──
-function initBoroughChart() {
+async function initBoroughChart() {
   const ctx = document.getElementById("borough-chart").getContext("2d");
+  const data = await fetchJSON(`${API_BASE}/summary/by-borough`);
+
+  const filtered = data
+    ? data.filter(
+        (b) =>
+          b.borough &&
+          b.borough !== "NaN" &&
+          b.borough !== "Unknown" &&
+          b.borough !== "EWR"
+      )
+    : [];
+
+  const labels = filtered.map((b) => b.borough);
+  const fares = filtered.map((b) => parseFloat(b.avg_fare));
 
   new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Manhattan", "Queens", "Brooklyn", "Bronx", "S. Island"],
+      labels: labels,
       datasets: [
         {
-          data: [22.1, 17.4, 14.8, 12.3, 10.9],
+          data: fares,
           backgroundColor: [
             "rgba(55,138,221,0.7)",
             "rgba(55,138,221,0.55)",
@@ -218,7 +258,7 @@ initBoroughChart();
 
 // ── Component G: Filter bar ──
 function initFilters() {
-  document.getElementById("apply-filters").addEventListener("click", () => {
+  document.getElementById("apply-filters").addEventListener("click", async () => {
     const filters = {
       hourStart: parseInt(document.getElementById("hour-start").value),
       hourEnd: parseInt(document.getElementById("hour-end").value),
@@ -231,11 +271,20 @@ function initFilters() {
 
     console.log("Filters applied:", filters);
 
+    // Build API URL with filters
+    let url = `${API_BASE}/trips?limit=500`;
+    if (filters.borough && filters.borough !== "All")
+      url += `&borough=${encodeURIComponent(filters.borough)}`;
+    if (filters.fareMin) url += `&min_fare=${filters.fareMin}`;
+    if (filters.fareMax) url += `&max_fare=${filters.fareMax}`;
+    if (filters.distMin) url += `&min_distance=${filters.distMin}`;
+    if (filters.distMax) url += `&max_distance=${filters.distMax}`;
+
+    const data = await fetchJSON(url);
+    if (data) console.log(`Loaded ${data.length} trips`);
+
     // Show heat blobs once filters are applied
     showHeatBlobs(map);
-
-    // Later this will pass filters to the API
-    // and load real pickup counts per zone
   });
 }
 
@@ -277,7 +326,8 @@ function initZones(map) {
           });
 
           // Show zone info in panel on click
-          layer.on("click", function () {
+          // Show zone info in panel on click
+          layer.on("click", async function () {
             const props = feature.properties;
 
             // Update panel zone info
@@ -288,6 +338,22 @@ function initZones(map) {
             // Open the panel
             document.getElementById("insights-panel").classList.add("open");
             document.getElementById("chart-toggle").classList.add("active");
+
+            // Fetch real stats for this zone
+            const stats = await fetchJSON(
+              `${API_BASE}/zones/${props.LocationID}/summary`
+            );
+
+            if (stats) {
+              document.getElementById("panel-fare").textContent =
+                `$${stats.avg_fare}`;
+              document.getElementById("panel-pickups").textContent =
+                parseInt(stats.trip_count).toLocaleString();
+              document.getElementById("panel-distance").textContent =
+                `${stats.avg_distance} mi`;
+              document.getElementById("panel-peak").textContent =
+                `${stats.peak_hour}:00`;
+            }
           });
         },
       }).addTo(map);
@@ -325,45 +391,55 @@ initZones(map);
 // ── Heat blobs: show activity intensity per zone ──
 let heatBlobLayer = null;
 
-function showHeatBlobs(map) {
+// Real zone coordinates for top pickup zones
+const ZONE_COORDS = {
+  "JFK Airport":                  [40.6413, -73.7781],
+  "Upper East Side South":        [40.7648, -73.9595],
+  "Upper East Side North":        [40.7736, -73.9566],
+  "Midtown Center":               [40.7549, -73.9840],
+  "Penn Station/Madison Sq West": [40.7506, -73.9971],
+  "Midtown East":                 [40.7523, -73.9714],
+  "Lincoln Square East":          [40.7741, -73.9825],
+  "Times Sq/Theatre District":    [40.7580, -73.9855],
+  "LaGuardia Airport":            [40.7769, -73.8740],
+  "Upper West Side South":        [40.7751, -73.9844],
+};
+
+async function showHeatBlobs(map) {
   // Remove old blobs if they exist
   if (heatBlobLayer) {
     map.removeLayer(heatBlobLayer);
   }
 
-  // Dummy pickup data per zone (will come from API later)
-  // Format: [latitude, longitude, pickup count]
-  const dummyZoneActivity = [
-    [40.7549, -73.984, 4821], // Midtown
-    [40.758, -73.9855, 3950], // Times Square area
-    [40.7128, -74.006, 2100], // Lower Manhattan
-    [40.6892, -73.9442, 1450], // Brooklyn
-    [40.7282, -73.7949, 1800], // Queens / JFK area
-    [40.8448, -73.8648, 600], // Bronx
-    [40.5795, -74.1502, 300], // Staten Island
-  ];
+  // Fetch real pickup data from API
+  const data = await fetchJSON(`${API_BASE}/zones/top-pickup?limit=10`);
+  if (!data) return;
 
   // Find the highest pickup count to scale everything else against
-  const maxCount = Math.max(...dummyZoneActivity.map((z) => z[2]));
+  const maxCount = Math.max(...data.map((z) => parseInt(z.trip_count)));
 
-  const blobs = dummyZoneActivity.map((zone) => {
-    const [lat, lng, count] = zone;
+  const blobs = data.map((zone) => {
+    const coords = ZONE_COORDS[zone.zone];
+    if (!coords) return null;
+
+    const count = parseInt(zone.trip_count);
+    const ratio = count / maxCount;
 
     // Scale radius between 800m and 2200m based on activity
-    const radius = 800 + (count / maxCount) * 1400;
+    const radius = 800 + ratio * 1400;
 
     // Pick colour based on activity level
     let colour;
-    if (count / maxCount > 0.6) {
+    if (ratio > 0.6) {
       colour = "#EF9F27"; // gold = high
-    } else if (count / maxCount > 0.3) {
+    } else if (ratio > 0.3) {
       colour = "#5DCAA5"; // teal = medium
     } else {
       colour = "#378ADD"; // blue = low
     }
 
     // The soft glowing blob
-    const blob = L.circle([lat, lng], {
+    const blob = L.circle(coords, {
       radius: radius,
       fillColor: colour,
       fillOpacity: 0.25,
@@ -373,7 +449,7 @@ function showHeatBlobs(map) {
     });
 
     // The precise center point marker
-    const point = L.circleMarker([lat, lng], {
+    const point = L.circleMarker(coords, {
       radius: 3,
       fillColor: "#FFFFFF",
       fillOpacity: 0.9,
@@ -383,7 +459,7 @@ function showHeatBlobs(map) {
     });
 
     return [blob, point];
-  });
+  }).filter(Boolean);
 
   // Flatten since each zone now returns two layers (blob + point)
   const flatBlobs = blobs.flat();
@@ -397,6 +473,9 @@ function hideHeatBlobs(map) {
     heatBlobLayer = null;
   }
 }
+
+// Load heat blobs on startup
+showHeatBlobs(map);
 
 // ── Theme toggle: light / dark mode ──
 function initThemeToggle() {
