@@ -6,7 +6,7 @@ An interactive full-stack web application that processes, stores, and visualises
 ---
 
 ## Video Walkthrough
-> [Insert video link here]
+> 
 
 ## Database Dump (Full)
 > [Google Drive — Full DB Dump](https://drive.google.com/file/d/17zWiBQG-VbxkjbpIcDStc0LaWVqR3KhB/view?usp=sharing)
