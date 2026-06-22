@@ -70,4 +70,25 @@ router.get('/:locationId/summary', async (req, res) => {
   }
 });
 
+// GET /api/zones/:locationId/by-hour
+router.get('/:locationId/by-hour', async (req, res) => {
+  try {
+    const { locationId } = req.params;
+
+    const result = await pool.query(`
+      SELECT
+        EXTRACT(HOUR FROM pickup_datetime) AS hour,
+        COUNT(*) AS trip_count
+      FROM trips
+      WHERE pu_location_id = $1
+      GROUP BY hour
+      ORDER BY hour
+    `, [parseInt(locationId)]);
+
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

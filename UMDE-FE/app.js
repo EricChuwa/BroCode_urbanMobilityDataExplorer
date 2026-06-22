@@ -136,7 +136,7 @@ async function initHourlyChart() {
   const hours = data ? data.map((d) => `${d.hour}:00`) : [];
   const tripCounts = data ? data.map((d) => parseInt(d.trip_count)) : [];
 
-  new Chart(ctx, {
+  window.hourlyChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: hours,
@@ -162,9 +162,7 @@ async function initHourlyChart() {
       },
       scales: {
         x: {
-          grid: {
-            color: "rgba(255,255,255,0.04)",
-          },
+          grid: { color: "rgba(255,255,255,0.04)" },
           ticks: {
             color: "#4a5568",
             font: { family: "Inter", size: 9 },
@@ -172,9 +170,7 @@ async function initHourlyChart() {
           },
         },
         y: {
-          grid: {
-            color: "rgba(255,255,255,0.04)",
-          },
+          grid: { color: "rgba(255,255,255,0.04)" },
           ticks: {
             color: "#4a5568",
             font: { family: "Inter", size: 9 },
@@ -203,7 +199,7 @@ async function initBoroughChart() {
   const labels = filtered.map((b) => b.borough);
   const fares = filtered.map((b) => parseFloat(b.avg_fare));
 
-  new Chart(ctx, {
+  window.boroughChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: labels,
@@ -339,11 +335,13 @@ function initZones(map) {
             document.getElementById("insights-panel").classList.add("open");
             document.getElementById("chart-toggle").classList.add("active");
 
-            // Fetch real stats for this zone
-            const stats = await fetchJSON(
-              `${API_BASE}/zones/${props.LocationID}/summary`
-            );
+            // Fetch zone stats and hourly data in parallel
+            const [stats, hourly] = await Promise.all([
+              fetchJSON(`${API_BASE}/zones/${props.LocationID}/summary`),
+              fetchJSON(`${API_BASE}/zones/${props.LocationID}/by-hour`)
+            ]);
 
+            // Update panel stats
             if (stats) {
               document.getElementById("panel-fare").textContent =
                 `$${stats.avg_fare}`;
@@ -353,6 +351,29 @@ function initZones(map) {
                 `${stats.avg_distance} mi`;
               document.getElementById("panel-peak").textContent =
                 `${stats.peak_hour}:00`;
+            }
+
+            // Highlight clicked zone's borough in the chart
+            if (window.boroughChart && stats) {
+              const boroughIndex = window.boroughChart.data.labels
+                .indexOf(stats.borough);
+
+              window.boroughChart.data.datasets[0].backgroundColor =
+                window.boroughChart.data.labels.map((_, i) =>
+                  i === boroughIndex
+                    ? "rgba(55,138,221,1.0)"
+                    : "rgba(55,138,221,0.25)"
+                );
+              window.boroughChart.update();
+            }
+
+            // Update hourly chart with zone-specific data
+            if (hourly && window.hourlyChart) {
+              window.hourlyChart.data.labels =
+                hourly.map((d) => `${d.hour}:00`);
+              window.hourlyChart.data.datasets[0].data =
+                hourly.map((d) => parseInt(d.trip_count));
+              window.hourlyChart.update();
             }
           });
         },
