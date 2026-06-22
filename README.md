@@ -6,7 +6,7 @@ An interactive full-stack web application that processes, stores, and visualises
 ---
 
 ## Video Walkthrough
-> https://drive.google.com/drive/folders/1XmS3KvMtZcyPR-Td4EvxMj85wcoxGN6q?usp=drive_link
+> [BroCode ~ City Lens Walkthrough](https://drive.google.com/drive/folders/1XmS3KvMtZcyPR-Td4EvxMj85wcoxGN6q?usp=drive_link)
 
 ## Database Dump (Full)
 > [Google Drive — Full DB Dump](https://drive.google.com/file/d/17zWiBQG-VbxkjbpIcDStc0LaWVqR3KhB/view?usp=sharing)
