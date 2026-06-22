@@ -1,11 +1,43 @@
 console.log("City Lens loaded");
 
-// ── Dummy data (will be replaced by API calls later) ──
-function loadStatCards() {
-  document.getElementById("stat-fare").textContent = "$18.40";
-  document.getElementById("stat-distance").textContent = "3.2 mi";
-  document.getElementById("stat-peak").textContent = "6 pm";
-  document.getElementById("stat-zone").textContent = "Midtown";
+const API_BASE = "http://127.0.0.1:3000/api";
+
+// ── Fetch helper ──
+async function fetchJSON(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error("API error:", err);
+    return null;
+  }
+}
+
+// ── Dummy data (replaced by API calls) ──
+async function loadStatCards() {
+  const [boroughData, hourData] = await Promise.all([
+    fetchJSON(`${API_BASE}/summary/by-borough`),
+    fetchJSON(`${API_BASE}/summary/by-hour`)
+  ]);
+
+  if (!boroughData || !hourData) return;
+
+  const manhattan = boroughData.find((b) => b.borough === "Manhattan");
+  const all = boroughData.filter(
+    (b) => b.borough && b.borough !== "NaN" && b.borough !== "Unknown" && b.borough !== "EWR"
+  );
+  const peakHour = hourData.reduce((max, h) =>
+    parseInt(h.trip_count) > parseInt(max.trip_count) ? h : max
+  );
+
+  document.getElementById("stat-fare").textContent =
+    manhattan ? `$${manhattan.avg_fare}` : "N/A";
+  document.getElementById("stat-distance").textContent =
+    manhattan ? `${manhattan.avg_distance} mi` : "N/A";
+  document.getElementById("stat-peak").textContent = `${peakHour.hour}:00`;
+  document.getElementById("stat-zone").textContent =
+    all[0] ? all[0].borough : "N/A";
 }
 loadStatCards();
 
@@ -81,42 +113,36 @@ function initChartToggle() {
 initChartToggle();
 
 // ── Component F: Slide-in panel ──
-function initInsightsPanel() {
-  // Load dummy data into panel stats
-  document.getElementById("panel-fare").textContent = "$22.10";
-  document.getElementById("panel-pickups").textContent = "4,821";
-  document.getElementById("panel-distance").textContent = "3.4 mi";
-  document.getElementById("panel-peak").textContent = "6 pm";
+async function initInsightsPanel() {
+  const data = await fetchJSON(`${API_BASE}/summary/by-borough`);
+  if (!data) return;
+
+  const manhattan = data.find((b) => b.borough === "Manhattan");
+  if (!manhattan) return;
+
+  document.getElementById("panel-fare").textContent = `$${manhattan.avg_fare}`;
+  document.getElementById("panel-pickups").textContent =
+    parseInt(manhattan.trip_count).toLocaleString();
+  document.getElementById("panel-distance").textContent =
+    `${manhattan.avg_distance} mi`;
+  document.getElementById("panel-peak").textContent = "18:00";
 }
 
 // ── Chart 1: Trip volume by hour ──
-function initHourlyChart() {
+async function initHourlyChart() {
   const ctx = document.getElementById("hourly-chart").getContext("2d");
+  const data = await fetchJSON(`${API_BASE}/summary/by-hour`);
 
-  const hours = [
-    "12a",
-    "2a",
-    "4a",
-    "6a",
-    "8a",
-    "10a",
-    "12p",
-    "2p",
-    "4p",
-    "6p",
-    "8p",
-    "10p",
-  ];
+  const hours = data ? data.map((d) => `${d.hour}:00`) : [];
+  const tripCounts = data ? data.map((d) => parseInt(d.trip_count)) : [];
 
-  const data = [320, 180, 90, 210, 580, 720, 650, 700, 740, 890, 760, 540];
-
-  new Chart(ctx, {
+  window.hourlyChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: hours,
       datasets: [
         {
-          data: data,
+          data: tripCounts,
           borderColor: "#378ADD",
           backgroundColor: "rgba(55,138,221,0.1)",
           borderWidth: 1.5,
@@ -136,9 +162,7 @@ function initHourlyChart() {
       },
       scales: {
         x: {
-          grid: {
-            color: "rgba(255,255,255,0.04)",
-          },
+          grid: { color: "rgba(255,255,255,0.04)" },
           ticks: {
             color: "#4a5568",
             font: { family: "Inter", size: 9 },
@@ -146,9 +170,7 @@ function initHourlyChart() {
           },
         },
         y: {
-          grid: {
-            color: "rgba(255,255,255,0.04)",
-          },
+          grid: { color: "rgba(255,255,255,0.04)" },
           ticks: {
             color: "#4a5568",
             font: { family: "Inter", size: 9 },
@@ -160,16 +182,30 @@ function initHourlyChart() {
 }
 
 // ── Chart 2: Avg fare by borough ──
-function initBoroughChart() {
+async function initBoroughChart() {
   const ctx = document.getElementById("borough-chart").getContext("2d");
+  const data = await fetchJSON(`${API_BASE}/summary/by-borough`);
 
-  new Chart(ctx, {
+  const filtered = data
+    ? data.filter(
+        (b) =>
+          b.borough &&
+          b.borough !== "NaN" &&
+          b.borough !== "Unknown" &&
+          b.borough !== "EWR"
+      )
+    : [];
+
+  const labels = filtered.map((b) => b.borough);
+  const fares = filtered.map((b) => parseFloat(b.avg_fare));
+
+  window.boroughChart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Manhattan", "Queens", "Brooklyn", "Bronx", "S. Island"],
+      labels: labels,
       datasets: [
         {
-          data: [22.1, 17.4, 14.8, 12.3, 10.9],
+          data: fares,
           backgroundColor: [
             "rgba(55,138,221,0.7)",
             "rgba(55,138,221,0.55)",
@@ -218,7 +254,7 @@ initBoroughChart();
 
 // ── Component G: Filter bar ──
 function initFilters() {
-  document.getElementById("apply-filters").addEventListener("click", () => {
+  document.getElementById("apply-filters").addEventListener("click", async () => {
     const filters = {
       hourStart: parseInt(document.getElementById("hour-start").value),
       hourEnd: parseInt(document.getElementById("hour-end").value),
@@ -231,11 +267,20 @@ function initFilters() {
 
     console.log("Filters applied:", filters);
 
+    // Build API URL with filters
+    let url = `${API_BASE}/trips?limit=500`;
+    if (filters.borough && filters.borough !== "All")
+      url += `&borough=${encodeURIComponent(filters.borough)}`;
+    if (filters.fareMin) url += `&min_fare=${filters.fareMin}`;
+    if (filters.fareMax) url += `&max_fare=${filters.fareMax}`;
+    if (filters.distMin) url += `&min_distance=${filters.distMin}`;
+    if (filters.distMax) url += `&max_distance=${filters.distMax}`;
+
+    const data = await fetchJSON(url);
+    if (data) console.log(`Loaded ${data.length} trips`);
+
     // Show heat blobs once filters are applied
     showHeatBlobs(map);
-
-    // Later this will pass filters to the API
-    // and load real pickup counts per zone
   });
 }
 
@@ -277,7 +322,8 @@ function initZones(map) {
           });
 
           // Show zone info in panel on click
-          layer.on("click", function () {
+          // Show zone info in panel on click
+          layer.on("click", async function () {
             const props = feature.properties;
 
             // Update panel zone info
@@ -288,6 +334,47 @@ function initZones(map) {
             // Open the panel
             document.getElementById("insights-panel").classList.add("open");
             document.getElementById("chart-toggle").classList.add("active");
+
+            // Fetch zone stats and hourly data in parallel
+            const [stats, hourly] = await Promise.all([
+              fetchJSON(`${API_BASE}/zones/${props.LocationID}/summary`),
+              fetchJSON(`${API_BASE}/zones/${props.LocationID}/by-hour`)
+            ]);
+
+            // Update panel stats
+            if (stats) {
+              document.getElementById("panel-fare").textContent =
+                `$${stats.avg_fare}`;
+              document.getElementById("panel-pickups").textContent =
+                parseInt(stats.trip_count).toLocaleString();
+              document.getElementById("panel-distance").textContent =
+                `${stats.avg_distance} mi`;
+              document.getElementById("panel-peak").textContent =
+                `${stats.peak_hour}:00`;
+            }
+
+            // Highlight clicked zone's borough in the chart
+            if (window.boroughChart && stats) {
+              const boroughIndex = window.boroughChart.data.labels
+                .indexOf(stats.borough);
+
+              window.boroughChart.data.datasets[0].backgroundColor =
+                window.boroughChart.data.labels.map((_, i) =>
+                  i === boroughIndex
+                    ? "rgba(55,138,221,1.0)"
+                    : "rgba(55,138,221,0.25)"
+                );
+              window.boroughChart.update();
+            }
+
+            // Update hourly chart with zone-specific data
+            if (hourly && window.hourlyChart) {
+              window.hourlyChart.data.labels =
+                hourly.map((d) => `${d.hour}:00`);
+              window.hourlyChart.data.datasets[0].data =
+                hourly.map((d) => parseInt(d.trip_count));
+              window.hourlyChart.update();
+            }
           });
         },
       }).addTo(map);
@@ -326,37 +413,42 @@ initZones(map);
 let heatBlobLayer = null;
 
 function showHeatBlobs(map) {
+  // Remove old blobs if they exist
   if (heatBlobLayer) {
     map.removeLayer(heatBlobLayer);
   }
 
-  const isLight = document.body.classList.contains("light-mode");
-
+  // Dummy pickup data per zone (will come from API later)
+  // Format: [latitude, longitude, pickup count]
   const dummyZoneActivity = [
-    [40.7549, -73.984, 4821],
-    [40.758, -73.9855, 3950],
-    [40.7128, -74.006, 2100],
-    [40.6892, -73.9442, 1450],
-    [40.7282, -73.7949, 1800],
-    [40.8448, -73.8648, 600],
-    [40.5795, -74.1502, 300],
+    [40.7549, -73.984, 4821], // Midtown
+    [40.758, -73.9855, 3950], // Times Square area
+    [40.7128, -74.006, 2100], // Lower Manhattan
+    [40.6892, -73.9442, 1450], // Brooklyn
+    [40.7282, -73.7949, 1800], // Queens / JFK area
+    [40.8448, -73.8648, 600], // Bronx
+    [40.5795, -74.1502, 300], // Staten Island
   ];
 
+  // Find the highest pickup count to scale everything else against
   const maxCount = Math.max(...dummyZoneActivity.map((z) => z[2]));
 
   const blobs = dummyZoneActivity.map((zone) => {
     const [lat, lng, count] = zone;
+
+    // Scale radius between 800m and 2200m based on activity
     const radius = 800 + (count / maxCount) * 1400;
 
     let colour;
     if (count / maxCount > 0.6) {
-      colour = isLight ? "#C9760F" : "#EF9F27";
+      colour = "#EF9F27"; // gold = high
     } else if (count / maxCount > 0.3) {
-      colour = isLight ? "#1F8F68" : "#5DCAA5";
+      colour = "#5DCAA5"; // teal = medium
     } else {
       colour = isLight ? "#1A5FA3" : "#378ADD";
     }
 
+    // The soft glowing blob
     const blob = L.circle([lat, lng], {
       radius: radius,
       fillColor: colour,
@@ -366,6 +458,7 @@ function showHeatBlobs(map) {
       opacity: 0.6,
     });
 
+    // The precise center point marker
     const point = L.circleMarker([lat, lng], {
       radius: 3,
       fillColor: "#FFFFFF",
@@ -376,7 +469,7 @@ function showHeatBlobs(map) {
     });
 
     return [blob, point];
-  });
+  }).filter(Boolean);
 
   const flatBlobs = blobs.flat();
   heatBlobLayer = L.layerGroup(flatBlobs).addTo(map);
@@ -388,6 +481,9 @@ function hideHeatBlobs(map) {
     heatBlobLayer = null;
   }
 }
+
+// Load heat blobs on startup
+showHeatBlobs(map);
 
 // ── Theme toggle: light / dark mode ──
 function initThemeToggle() {
