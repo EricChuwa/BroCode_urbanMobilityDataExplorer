@@ -91,4 +91,75 @@ router.get('/:locationId/by-hour', async (req, res) => {
   }
 });
 
+// GET /api/zones/activity
+router.get('/activity', async (req, res) => {
+  try {
+    const {
+      borough,
+      min_fare,
+      max_fare,
+      min_distance,
+      max_distance,
+      hour_start,
+      hour_end
+    } = req.query;
+
+    let query = `
+      SELECT
+        z.zone,
+        z.borough,
+        t.pu_location_id,
+        COUNT(*) AS trip_count,
+        ROUND(AVG(t.fare_amount)::numeric, 2) AS avg_fare,
+        ROUND(AVG(t.trip_distance)::numeric, 2) AS avg_distance
+      FROM trips t
+      LEFT JOIN zones z ON t.pu_location_id = z.location_id
+      WHERE 1=1
+    `;
+
+    const params = [];
+    let i = 1;
+
+    if (borough) {
+      query += ` AND z.borough = $${i++}`;
+      params.push(borough);
+    }
+    if (min_fare) {
+      query += ` AND t.fare_amount >= $${i++}`;
+      params.push(parseFloat(min_fare));
+    }
+    if (max_fare) {
+      query += ` AND t.fare_amount <= $${i++}`;
+      params.push(parseFloat(max_fare));
+    }
+    if (min_distance) {
+      query += ` AND t.trip_distance >= $${i++}`;
+      params.push(parseFloat(min_distance));
+    }
+    if (max_distance) {
+      query += ` AND t.trip_distance <= $${i++}`;
+      params.push(parseFloat(max_distance));
+    }
+    if (hour_start !== undefined) {
+      query += ` AND EXTRACT(HOUR FROM t.pickup_datetime) >= $${i++}`;
+      params.push(parseInt(hour_start));
+    }
+    if (hour_end !== undefined) {
+      query += ` AND EXTRACT(HOUR FROM t.pickup_datetime) <= $${i++}`;
+      params.push(parseInt(hour_end));
+    }
+
+    query += `
+      GROUP BY z.zone, z.borough, t.pu_location_id
+      ORDER BY trip_count DESC
+      LIMIT 20
+    `;
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
