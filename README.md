@@ -112,7 +112,7 @@ docker ps
 
 ---
 
-## 🗄️ Option A — Restore Full Database (Recommended)
+## Option A — Restore Full Database (Recommended)
 
 Skip the pipeline entirely by restoring the pre-built database dump:
 
@@ -138,7 +138,7 @@ docker exec -it umde-postgres psql -U umde_user -d umde_db \
 
 ---
 
-## 🔄 Option B — Run the Full Pipeline
+## Option B — Run the Full Pipeline
 
 If you want to run the data pipeline from scratch:
 
@@ -173,7 +173,7 @@ python3 UMDE-BE/pipeline/db_insert.py
 
 ---
 
-## 🖥️ Running the Backend
+## Running the Backend
 
 ```bash
 cd UMDE-BE
@@ -207,7 +207,7 @@ http://127.0.0.1:8080
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
